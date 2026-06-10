@@ -1,0 +1,15 @@
+{
+  "name": "gfiedler/todo-api",
+  "description": "API de To-Do List",
+  "type": "project",
+  "require": {
+    "php": "^8.1",
+    "vlucas/phpdotenv": "^5.6",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Gfiedler\\ToDoAPI\\": "app/"
+    }
+  }
+}
