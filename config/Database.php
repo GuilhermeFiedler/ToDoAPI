@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Gfiedler\GerenciaContatos\Config;
+namespace Gfiedler\ToDoAPI\config;
 use PDO;
 
 class Database
