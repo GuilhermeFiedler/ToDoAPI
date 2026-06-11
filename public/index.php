@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use Dotenv\Dotenv;
+
 require __DIR__ . '/../vendor/autoload.php';
 
-\Dotenv\Dotenv::createImmutable(__DIR__ . '/../')->load();
+Dotenv::createImmutable(__DIR__ . '/../')->load();
 
 $dbHost = $_ENV['DB_HOST'];
 $dbName = $_ENV['DB_NAME'];
