@@ -6,4 +6,14 @@ enum StatusTarefa: string {
 
     case Concluida = 'Concluida';
 
+    public function podeTransicionarPara(
+        self $novo
+    ): bool {
+        return true;
+    }
+
+    public function label(): string
+    {
+        return $this->value;
+    }
 }

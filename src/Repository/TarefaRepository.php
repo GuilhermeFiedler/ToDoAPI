@@ -7,35 +7,62 @@ class TarefaRepository {
     ) {}
 
     // CREATE
-    public function criar(string $titulo, string $descricao): int {
+    public function criar(
+        string $titulo,
+        string $descricao
+    ): int {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO tarefas (titulo, descricao, criado_em) 
-             VALUES (:titulo, :descricao, NOW())'
+            'INSERT INTO tarefas
+        (
+            titulo,
+            descricao,
+            criado_em
+        )
+        VALUES
+        (
+            :titulo,
+            :descricao,
+            NOW()
+        )
+        RETURNING id'
         );
         $stmt->execute([
-            ':titulo'       => $titulo,
-            ':descricao'      => $descricao
+            ':titulo' => $titulo,
+            ':descricao' => $descricao
         ]);
-        return (int) $this->pdo->lastInsertId();
+        return (int)$stmt->fetchColumn();
     }
 
     // READ
-    public function listar(): ?array {
-        $stmt = $this->pdo->prepare(
-            'SELECT id, titulo, descricao, criado_em FROM tarefas ORDER BY criado_em DESC'
+    public function listar(): array
+    {
+        $stmt = $this->pdo->query(
+            'SELECT * FROM tarefas
+         ORDER BY criado_em DESC'
         );
-        $stmt->execute();
-        return $stmt->fetch() ?: null;
+
+        $dados = $stmt->fetchAll();
+
+        return array_map(
+            fn(array $row) => Tarefa::fromArray($row),
+            $dados
+        );
     }
 
 
     // READ por id
-    public function buscarPorId(int $id): ?array {
-        $stmt = $this->pdo->prepare(
-            'SELECT id, titulo, descricao, criado_em $ FROM tarefas WHERE id = :id'
+    public function buscarPorId(int $id): ?Tarefa
+    {$stmt = $this->pdo->prepare(
+     'SELECT * FROM tarefas WHERE id = :id'
         );
-        $stmt->execute([':id' => $id]);
-        return $stmt->fetch() ?: null;
+        $stmt->execute([
+            ':id' => $id
+        ]);
+        $dados = $stmt->fetch();
+        if (!$dados) {
+            return null;
+        }
+        return Tarefa::fromArray($dados);
     }
 
     // UPDATE

@@ -9,30 +9,23 @@ class TarefaService
     {
     }
 
-    public function criar(array $dados): array
+    public function criar(array $dados): \Tarefa
     {
         $titulo = trim($dados['titulo'] ?? '');
         $descricao = trim($dados['descricao'] ?? '');
 
         if ($titulo === '') {
-            throw new InvalidArgumentException('Titulo é obrigatório');
+            throw new InvalidArgumentException(
+                'Título obrigatório'
+            );
         }
 
-        if (!ValidatorService::descricao($descricao)) {
-            throw new InvalidArgumentException('Descrição inválida');
-        }
-
-
-        $tarefa = new Tarefa(
-            id: $dados['id'] ?? 0,
-            titulo : $titulo,
-            descricao: $descricao,
+        $id = $this->repository->criar(
+            $titulo,
+            $descricao
         );
-        $id = $this->repository->criar($tarefa);
 
-        $tarefa = $this->repository->buscarPorId($id);
-
-        return $this->toArray($tarefa);
+        return $this->repository->buscarPorId($id);
     }
 
     public function atualizar(int $id, array $dados): bool
@@ -45,13 +38,7 @@ class TarefaService
             throw new InvalidArgumentException('Descrição inválida');
         }
 
-
-        $tarefa = new Tarefa(
-            titulo : $titulo,
-            descricao: $descricao,
-        );
-
-        return $this->repository->atualizar($titulo, $descricao, $id);
+        return $this->repository->atualizar($id,$titulo, $descricao);
     }
 
     public function excluir(int $id): bool
@@ -59,31 +46,22 @@ class TarefaService
         return $this->repository->excluir($id);
     }
 
-    public function buscar(int $id): ?array
+    public function buscar(int $id): \Tarefa
     {
-        $tarefa = $this->repository->buscarPorId($id);
-
-        if (!$tarefa) {
-            return null;
-        }
-        return $this->toArray($tarefa);
+        return $this->repository->buscarPorId($id);
     }
 
     public function listar(): array
     {
-        $dados = $this->repository->listar();
-
-        $dadosFormatados = array_map(fn (Tarefa $c) => $this->toArray($c), $dados);
-
-        return $dadosFormatados;
+        return $this->repository->listar();
     }
 
     private function toArray(Tarefa $tarefa): array
     {
         return [
             'id' => $tarefa->getId(),
-            'nome' => $tarefa->getTitulo(),
-            'email' => $tarefa->getDescricao(),
+            'titulo' => $tarefa->getTitulo(),
+            'descricao' => $tarefa->getDescricao(),
         ];
     }
 }
