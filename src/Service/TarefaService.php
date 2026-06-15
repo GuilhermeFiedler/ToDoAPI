@@ -1,30 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Gfiedler\ToDoAPI\Service;
+
+use Gfiedler\ToDoAPI\Enum\Prioridade;
+use Gfiedler\ToDoAPI\Enum\StatusTarefa;
 use Gfiedler\ToDoAPI\Model\Tarefa;
+use Gfiedler\ToDoAPI\Repository\TarefaRepository;
+use InvalidArgumentException;
+
 class TarefaService
 {
-    public function __construct(
-        private readonly TarefaRepository $repository
-    )
+    public function __construct(private readonly TarefaRepository $repository)
     {
     }
 
-    public function criar(array $dados): \Tarefa
+    public function criar(array $dados): Tarefa
     {
         $titulo = trim($dados['titulo'] ?? '');
         $descricao = trim($dados['descricao'] ?? '');
-
-        if ($titulo === '') {
-            throw new InvalidArgumentException(
-                'Título obrigatório'
-            );
-        }
-
-        $id = $this->repository->criar(
-            $titulo,
-            $descricao
-        );
-
+        $status = StatusTarefa::tryFrom($dados['status'] ?? '') ?? StatusTarefa::Pendente;
+        $prioridade = Prioridade::tryFrom($dados['prioridade'] ?? '') ?? Prioridade::Media;
+        if ($titulo === '') throw new InvalidArgumentException('Título é obrigatório');
+        $id = $this->repository->criar($titulo, $descricao, $status, $prioridade);
         return $this->repository->buscarPorId($id);
     }
 
@@ -32,13 +31,10 @@ class TarefaService
     {
         $titulo = trim($dados['titulo'] ?? '');
         $descricao = trim($dados['descricao'] ?? '');
-
-
-        if (!ValidatorService::descricao($descricao)) {
-            throw new InvalidArgumentException('Descrição inválida');
-        }
-
-        return $this->repository->atualizar($id,$titulo, $descricao);
+        $status = StatusTarefa::tryFrom($dados['status'] ?? '') ?? StatusTarefa::Pendente;
+        $prioridade = Prioridade::tryFrom($dados['prioridade'] ?? '') ?? Prioridade::Media;
+        if ($titulo === '') throw new InvalidArgumentException('Título é obrigatório');
+        return $this->repository->atualizar($id, $titulo, $descricao, $status, $prioridade);
     }
 
     public function excluir(int $id): bool
@@ -46,7 +42,7 @@ class TarefaService
         return $this->repository->excluir($id);
     }
 
-    public function buscar(int $id): \Tarefa
+    public function buscar(int $id): ?Tarefa
     {
         return $this->repository->buscarPorId($id);
     }
@@ -54,14 +50,5 @@ class TarefaService
     public function listar(): array
     {
         return $this->repository->listar();
-    }
-
-    private function toArray(Tarefa $tarefa): array
-    {
-        return [
-            'id' => $tarefa->getId(),
-            'titulo' => $tarefa->getTitulo(),
-            'descricao' => $tarefa->getDescricao(),
-        ];
     }
 }
